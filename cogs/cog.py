@@ -1,9 +1,7 @@
-from cmath import log
 from discord.ext import commands, tasks
-from dotenv import load_dotenv
 import os
 import requests
-import logging
+from logger import log
 
 
 to_ignore = ["Visit www.githubstatus.com for more information"]
@@ -54,36 +52,34 @@ def get_gh_comp() -> str:
 
 class GithubCog(commands.Cog):
     def __init__(self, client):
-        load_dotenv()
         self.client = client
         set_watching()
-        self.channelNum = int(os.getenv("GH_CHANNEL"))
+        self.channelNum = int(os.environ["GH_CHANNEL"])
         self.channel = None
         self.periodic.start()
-        logging.info("Github Cog loaded")
+        log("INFO", "Github Cog loaded")
 
     @commands.command(name="gh_status", help="Gets the status of Github")
     async def gh_status(self, ctx):
         status = get_gh_status()
-        logging.info("Manual check triggered")
+        log("INFO", "Manual check triggered")
         if status is None:
-            logging.info("No reported issues")
+            log("No reported issues")
             await ctx.send("No reported issues")
         else:
-            logging.info(status)
+            log("INFO", status)
             await ctx.send(status)
 
     @tasks.loop(minutes=1)
     async def periodic(self):
         await self.client.wait_until_ready()
-        logging.info("Periodic check triggered")
+        log("INFO", "Periodic check triggered")
         if self.channel is None:
-            logging.info("Channel not set - setting to " + str(self.channelNum))
             self.channel = self.client.get_channel(self.channelNum)
 
         status = get_gh_status()
         if status is not None:
-            logging.info(status)
+            log("INFO", status)
             await self.channel.send(status)
 
 
