@@ -1,15 +1,15 @@
 import os
 from discord.ext import commands
-from discord import Intents
+# from discord import Intents
 from logger import log
 
 
 log("INFO", "Starting Bot")
 TOKEN = os.environ["DISCORD_TOKEN"]
-client = commands.Bot(command_prefix="/", intents=Intents.GUILD_MESSAGES)
+bot = commands.Bot(command_prefix="/")
 
 
-@client.event
+@bot.event
 async def on_ready():
     log("INFO", "Bot is up and running")
 
@@ -17,6 +17,6 @@ async def on_ready():
 for filename in os.listdir("cogs"):
     if filename.endswith(".py"):
         log("INFO", "Loading " + filename)
-        client.load_extension(f"cogs.{filename[:-3]}")
+        bot.load_extension(f"cogs.{filename[:-3]}")
 
-client.run(TOKEN)
+bot.run(TOKEN)

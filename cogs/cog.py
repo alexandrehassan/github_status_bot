@@ -51,8 +51,8 @@ def get_gh_comp() -> str:
 
 
 class GithubCog(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         set_watching()
         self.channelNum = int(os.environ["GH_CHANNEL"])
         self.channel = None
@@ -64,7 +64,7 @@ class GithubCog(commands.Cog):
         status = get_gh_status()
         log("INFO", "Manual check triggered")
         if status is None:
-            log("No reported issues")
+            log("INFO", "No reported issues")
             await ctx.send("No reported issues")
         else:
             log("INFO", status)
@@ -72,10 +72,10 @@ class GithubCog(commands.Cog):
 
     @tasks.loop(minutes=1)
     async def periodic(self):
-        await self.client.wait_until_ready()
-        log("INFO", "Periodic check triggered")
+        await self.bot.wait_until_ready()
+        log("DEBUG", "Periodic check triggered")
         if self.channel is None:
-            self.channel = self.client.get_channel(self.channelNum)
+            self.channel = self.bot.get_channel(self.channelNum)
 
         status = get_gh_status()
         if status is not None:
@@ -83,5 +83,5 @@ class GithubCog(commands.Cog):
             await self.channel.send(status)
 
 
-def setup(client):
-    client.add_cog(GithubCog(client))
+def setup(bot):
+    bot.add_cog(GithubCog(bot))
